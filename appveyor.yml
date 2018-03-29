@@ -1,0 +1,55 @@
+version: 1.0.0-{branch}-{build}
+image: Visual Studio 2017
+environment:
+  AZURE_STORAGE_CONNECTION_STRING:
+    secure: wXeUzfFewte+1JATay7ldiN4KnNRsGaOr8CTCWE/XApGY2A6B7V4B8JNyqysfGnB9Cbuv8IRdFWlo3FfG9/KkdWhixL/1ifSLMNRK1nQUaQc9xxt2lb8YvClD0XRIGmwuO0R41tsdQLPi5cKYR53kiJwzmWrHAo/d1EIKQgOxjg2+iAwmIBNZAqmng4dj4V+eX2twzGiM9YMEtMXO49alygGzJZpjLMg7YFn933WOwmPg9npAB70PX2esl8HP3+Y
+  LOCAL_NUGET_SOURCE_PATH: c:\projects\nuget\cache
+install:
+- ps: >-
+    $source = "https://cdorst-dev.azureedge.net/build/nuget-tools_15.zip"
+
+    $toolsZip = "c:\projects\nuget\tools_15.zip"
+
+    $toolsPath = "c:\projects\nuget\tools_15"
+
+    New-Item -ItemType Directory -Force -Path c:\projects\nuget\cache
+
+    $toolsExist = Test-Path $toolsPath
+
+    if (-NOT ($toolsExist)) {
+
+        New-Item -ItemType Directory -Force -Path $toolsPath
+
+        Invoke-WebRequest $source -OutFile $toolsZip
+
+        Expand-Archive -Path $toolsZip -DestinationPath $toolsPath -Force
+
+    }
+
+    & cd "$env:APPVEYOR_BUILD_FOLDER"
+
+    & dotnet c:\projects\nuget\tools_15\before.dll CDorst c:\projects\nuget\cache https://cdorst-dev.azureedge.net/nuget
+cache:
+- c:\projects\nuget\cache
+- c:\projects\nuget\tools_15
+before_build:
+- cmd: dotnet restore
+build:
+  verbosity: minimal
+after_build:
+- ps: >-
+    & dotnet c:\projects\nuget\tools_15\after.dll CDorst nuget c:\projects\nuget\tmp
+artifacts:
+- path: '**\*.nupkg'
+deploy:
+- provider: Environment
+  name: CDorstNuGet
+  on:
+    branch: master
+notifications:
+- provider: Email
+  to:
+  - chris@dorst.email
+  on_build_success: true
+  on_build_failure: true
+  on_build_status_changed: false
