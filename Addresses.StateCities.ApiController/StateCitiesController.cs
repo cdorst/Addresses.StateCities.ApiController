@@ -4,6 +4,7 @@
 using Addresses.StateCities.DatabaseContext;
 using DevOps.Code.DataAccess.Interfaces.Repository;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 
 namespace Addresses.StateCities.ApiController
