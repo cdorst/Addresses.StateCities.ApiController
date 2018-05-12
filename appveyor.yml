@@ -1,4 +1,4 @@
-version: 1.0.4-{branch}-{build}
+version: 1.0.5-{branch}-{build}
 image: Visual Studio 2017
 environment:
   AZURE_STORAGE_CONNECTION_STRING:
@@ -36,6 +36,7 @@ before_build:
 - cmd: dotnet restore
 build:
   verbosity: minimal
+configuration: Release
 after_build:
 - ps: >-
     & dotnet c:\projects\nuget\tools_15\after.dll CDorst nuget c:\projects\nuget\tmp
